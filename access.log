@@ -1,0 +1,258 @@
+127.0.0.1 - - [30/Apr/2025:04:02:17 +0000] "GET / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:04:02:47 +0000] "HEAD / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:04:02:54 +0000] "GET /not_exist.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:04:03:02 +0000] "DELETE / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 501 32
+127.0.0.1 - - [30/Apr/2025:04:03:23 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 12
+Content-Type: application/x-www-form-urlencoded
+
+测试数据" 200 250
+127.0.0.1 - - [30/Apr/2025:04:03:30 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:04:03:30 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:04:11:07 +0000] "DELETE / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 501 32
+127.0.0.1 - - [30/Apr/2025:04:16:01 +0000] "GET / HTTP/1.0
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+X-HTTP-Version: HTTP/0.9
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:12:56:50 +0000] "GET / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:12:58:18 +0000] "HEAD / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:12:58:40 +0000] "GET /not_exist.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:02:07 +0000] "DELETE / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:02:45 +0000] "DELETE / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:03:21 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 12
+Content-Type: application/x-www-form-urlencoded
+
+测试数据" 200 250
+127.0.0.1 - - [30/Apr/2025:13:04:26 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 14
+Content-Type: application/x-www-form-urlencoded
+
+测试数据\n" 200 252
+127.0.0.1 - - [30/Apr/2025:13:04:29 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 12
+Content-Type: application/x-www-form-urlencoded
+
+测试数据" 200 250
+127.0.0.1 - - [30/Apr/2025:13:04:41 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 12
+Content-Type: application/x-www-form-urlencoded
+
+测试数据" 200 250
+127.0.0.1 - - [30/Apr/2025:13:05:16 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:05:16 +0000] "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
+
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:06:15 +0000] "GET /test.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:10:18 +0000] "GET /large_file.bin HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:20:22 +0000] "GET /index.html HTTP/1.0
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:20:30 +0000] "GET /index.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:26:08 +0000] "GET /index.html HTTP/2.0
+Host: localhost
+
+" 505 43
+127.0.0.1 - - [30/Apr/2025:13:32:27 +0000] "GET /index.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:35:15 +0000] "GET /test.html HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:36:19 +0000] "GET /test.css HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:38:12 +0000] "GET /test.js HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0
+127.0.0.1 - - [30/Apr/2025:13:42:07 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:42:07 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:42:07 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:42:07 +0000] "Host: localhost
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:46:52 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:48:47 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:48:47 +0000] "
+Host: localhost  
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:52:51 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:52:55 +0000] "Host: localhost  
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:52:55 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:52:59 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:00 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:44 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:45 +0000] "Connection: keep-alive  
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:53:45 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:47 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:47 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:48 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:49 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:51 +0000] "Host: localhost  
+" 501 32
+127.0.0.1 - - [30/Apr/2025:13:53:51 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:51 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:13:53:52 +0000] "Invalid request" 400 28
+127.0.0.1 - - [30/Apr/2025:14:02:20 +0000] "POST / HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+Content-Length: 31
+Content-Type: application/x-www-form-urlencoded
+
+测试数据&=￥%T特殊字符" 200 269
+127.0.0.1 - - [30/Apr/2025:14:10:56 +0000] "GET /large_file.bin HTTP/1.1
+Host: localhost:9999
+User-Agent: curl/7.58.0
+Accept: */*
+
+" 200 0

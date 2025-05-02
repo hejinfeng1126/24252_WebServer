@@ -1,0 +1,48 @@
+[Wed Apr 30 03:46:18 2025] 收到信号 2，关闭socket。
+[Wed Apr 30 03:47:09 2025] Received signal 2, closing socket.
+[Wed Apr 30 03:53:32 2025] Received signal 2, closing socket.
+[Wed Apr 30 03:57:43 2025] Received signal 2, closing socket.
+[Wed Apr 30 03:58:28 2025] Received signal 2, closing socket.
+[Wed Apr 30 04:02:54 2025] File not found: static_site/not_exist.html
+[Wed Apr 30 04:03:02 2025] Unsupported HTTP method: DELETE
+[Wed Apr 30 04:03:30 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 04:03:30 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 04:11:07 2025] Unsupported HTTP method: DELETE
+[Wed Apr 30 04:14:17 2025] Received signal 2, closing socket.
+[Wed Apr 30 12:58:40 2025] File not found: static_site/not_exist.html
+[Wed Apr 30 13:02:07 2025] Unsupported HTTP method detected before parsing: DELETE
+[Wed Apr 30 13:02:45 2025] Unsupported HTTP method detected before parsing: DELETE
+[Wed Apr 30 13:05:16 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:05:16 2025] Unsupported HTTP method detected before parsing: 4X261W9QEiRIsjdvC86bnxPhTArkdTznb11/dPcGx4RDbw4QM
+[Wed Apr 30 13:06:15 2025] File not found: static_site/test.html
+[Wed Apr 30 13:26:08 2025] Unsupported HTTP version detected before parsing: HTTP/2.0
+[Wed Apr 30 13:42:07 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:42:07 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:42:07 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:42:07 2025] Unsupported HTTP method detected before parsing: Host:
+[Wed Apr 30 13:46:52 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:47:43 2025] Received signal 2, closing socket.
+[Wed Apr 30 13:48:47 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:48:47 2025] Unsupported HTTP method detected before parsing: Host:
+[Wed Apr 30 13:52:51 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:52:55 2025] Unsupported HTTP method detected before parsing: Host:
+[Wed Apr 30 13:52:55 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:52:59 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:00 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:44 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:45 2025] Unsupported HTTP method detected before parsing: Connection:
+[Wed Apr 30 13:53:45 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:47 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:47 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:48 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:49 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:51 2025] Unsupported HTTP method detected before parsing: Host:
+[Wed Apr 30 13:53:51 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:51 2025] Failed to parse request from 127.0.0.1
+[Wed Apr 30 13:53:52 2025] Failed to parse request from 127.0.0.1
