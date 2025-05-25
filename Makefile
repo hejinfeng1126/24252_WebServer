@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 liso_server: $(OBJ1)
-	$(CC) -Werror $^ -o $@
+	$(CC) -Werror $^ -o $@ -lpthread
 
 liso_client: $(OBJ_DIR)/liso_client.o
 	$(CC) -Werror $^ -o $@
