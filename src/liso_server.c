@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+/* 服务器配置常量 */
 #define ECHO_PORT 9999
 #define BUF_SIZE 4096
 #define GET_SUCCESS 1
@@ -17,8 +18,13 @@
 #define O_RDONLY 00
 #define S_ISREG 0100000
 #define S_IRUSR 00400
-#define MAX_CLIENT 1024
+#define MAX_CLIENT 1024  // 最大客户端连接数
 
+/**
+ * 关闭套接字连接
+ * @param sock 待关闭的套接字描述符
+ * @return 0表示成功，1表示失败
+ */
 int close_socket(int sock)
 {
     if (close(sock))
@@ -29,22 +35,35 @@ int close_socket(int sock)
     return 0;
 }
 
+/* HTTP方法常量 */
 char c_get[50] = "GET";
 char c_post[50] = "POST";
 char c_head[50] = "HEAD";
 
+/* HTTP响应状态行 */
 char RESPONSE_400[50] = "HTTP/1.1 400 Bad request\r\n\r\n";
 char RESPONSE_404[50] = "HTTP/1.1 404 Not Found\r\n\r\n";
 char RESPONSE_501[50] = "HTTP/1.1 501 Not Implemented\r\n\r\n";
 char RESPONSE_505[50] = "HTTP/1.1 505 HTTP Version not supported\r\n\r\n";
 char RESPONSE_200[50] = "HTTP/1.1 200 OK\r\n\r\n";
 
+/* HTTP协议与文件路径设置 */
 char http_version_now[50] = "HTTP/1.1";
 char root_path[50] = "./static_site";
 char file_path[50] = "/index.html";
 
+/* HTTP报文分隔标记 */
 char *separate = "\r\n\r\n";
 
+/**
+ * 处理GET请求 - 读取并返回指定文件内容
+ * @param request HTTP请求结构
+ * @param URL 请求的资源路径
+ * @param client_sock 客户端套接字
+ * @param readret 读取的字节数
+ * @param sock 服务器套接字
+ * @return GET_SUCCESS成功，GET_FAILURE失败
+ */
 int http_get(Request *request, char *URL, int client_sock, int readret, int sock)
 {
     struct stat *file_state = (struct stat *)malloc(sizeof(struct stat));
@@ -73,6 +92,15 @@ int http_get(Request *request, char *URL, int client_sock, int readret, int sock
     return GET_SUCCESS;
 }
 
+/**
+ * 处理HEAD请求 - 返回HTTP头信息但不返回文件内容
+ * @param requeset HTTP请求结构
+ * @param URL 请求的资源路径
+ * @param client_sock 客户端套接字
+ * @param readret 读取的字节数
+ * @param sock 服务器套接字
+ * @return GET_SUCCESS成功，GET_FAILURE失败
+ */
 int http_head(Request *requeset, char *URL, int client_sock, int readret, int sock)
 {
     struct stat *file_state = (struct stat *)malloc(sizeof(struct stat));
@@ -106,221 +134,272 @@ int http_head(Request *requeset, char *URL, int client_sock, int readret, int so
     return GET_SUCCESS;
 }
 
+/**
+ * 主函数 - HTTP服务器的入口点
+ */
 int main(int argc, char *argv[])
 {
-    int sock, client_sock;
-    ssize_t readret;
-    socklen_t cli_size;
-    struct sockaddr_in addr, cli_addr;
-    char buf[BUF_SIZE * 10];
-    char buf1[BUF_SIZE];
-    char buf2[BUF_SIZE];
-    fprintf(stdout, "----- Echo Server -----\n");
+    // 基本变量声明
+    int server_fd, client_fd;          // 服务器和客户端套接字描述符
+    ssize_t bytes_read;                 // 读取的字节数
+    socklen_t addr_len;                 // 地址结构长度
+    struct sockaddr_in server_addr, client_addr;  // 服务器和客户端地址结构
+    char input_buffer[BUF_SIZE * 10];   // 网络输入缓冲区
+    char resp_buffer[BUF_SIZE];         // 响应缓冲区
+    char req_buffer[BUF_SIZE];          // 请求解析缓冲区
+    fprintf(stdout, "----- HTTP Server Starting -----\n");
 
-    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1)
+    /* 创建服务器套接字 */
+    if ((server_fd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
     {
         fprintf(stderr, "Failed creating socket.\n");
         return EXIT_FAILURE;
     }
 
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(ECHO_PORT);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    /* 初始化服务器地址结构 */
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(ECHO_PORT);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)))
+    /* 绑定套接字到地址 */
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)))
     {
-        close_socket(sock);
+        close_socket(server_fd);
         fprintf(stderr, "Failed binding socket.\n");
         return EXIT_FAILURE;
     }
 
-    if (listen(sock, 5))
+    /* 开始监听连接请求 */
+    if (listen(server_fd, 5))
     {
-        close_socket(sock);
+        close_socket(server_fd);
         fprintf(stderr, "Error listening on socket.\n");
         return EXIT_FAILURE;
     }
 
-    int fd_client[MAX_CLIENT];
-    int client_count = 0;
-    fd_set tmp_fd;
-    fd_set ready_fd;
+    //并发处理数据结构
+    int connection_table[MAX_CLIENT];   // 客户端连接表
+    int active_connections = 0;         // 当前活动连接计数
+    fd_set read_set_tmp;                // 临时读集合
+    fd_set read_set_master;             // 主读集合
 
-    int max_fd = sock;
-    FD_ZERO(&tmp_fd);
-    FD_ZERO(&ready_fd);
-    FD_SET(sock, &ready_fd);
+    int highest_fd = server_fd;         // 最高文件描述符
+    FD_ZERO(&read_set_tmp);             // 初始化临时集合
+    FD_ZERO(&read_set_master);          // 初始化主集合
+    FD_SET(server_fd, &read_set_master); // 添加服务器套接字到主集合
 
+    /* 初始化连接表 */
     for (int i = 0; i < MAX_CLIENT; i++)
-        fd_client[i] = -1;
+        connection_table[i] = -1;       // -1表示空闲槽位
 
+    //主事件循环 - 基于select的并发处理
     while (1)
     {
-        tmp_fd = ready_fd;
-        int num_connect = select(max_fd + 1, &tmp_fd, NULL, NULL, NULL);
-        if (num_connect < 0)
+        // 复制主集合到临时集合（select会修改集合）
+        read_set_tmp = read_set_master;
+        
+        // 使用select等待I/O事件
+        int ready_count = select(highest_fd + 1, &read_set_tmp, NULL, NULL, NULL);
+        if (ready_count < 0)
         {
-            return EXIT_FAILURE;
+        return EXIT_FAILURE;
+    }
+        else if (ready_count == 0)
+        {
+            continue;  // 超时，继续下一轮
         }
-        else if (num_connect == 0)
+        
+        /* 检查服务器套接字上是否有新连接 */
+        if (FD_ISSET(server_fd, &read_set_tmp))
         {
-            continue;
-        }
-        if (FD_ISSET(sock, &tmp_fd))
-        {
-            cli_size = sizeof(cli_addr);
-            client_sock = accept(sock, (struct sockaddr *)&cli_addr, &cli_size);
-            if (client_sock < 0)
-                continue;
+            addr_len = sizeof(client_addr);
+            // 接受新连接
+            client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+            if (client_fd < 0)
+                continue;  // 接受失败，继续
+                
+            /* 查找空闲槽位存储新连接 */
             for (int i = 0; i < MAX_CLIENT; i++)
             {
-                if (fd_client[i] == -1)
+                if (connection_table[i] == -1)
                 {
-                    fd_client[i] = client_sock;
-                    FD_SET(client_sock, &ready_fd);
-                    max_fd = (client_sock > max_fd) ? client_sock : max_fd;
+                    // 找到空闲槽位，保存连接
+                    connection_table[i] = client_fd;
+                    // 将新连接添加到监听集合
+                    FD_SET(client_fd, &read_set_master);
+                    // 更新最高文件描述符
+                    highest_fd = (client_fd > highest_fd) ? client_fd : highest_fd;
                     break;
                 }
                 if (i == MAX_CLIENT - 1)
                 {
-                    printf("Clients Overflow!\n");
+                    printf("Warning: Maximum connections reached!\n");
                 }
             }
         }
-        for (int i = 0; i < MAX_CLIENT; i++)
+        
+        /* 处理现有客户端连接的数据 */
+        for (int conn_idx = 0; conn_idx < MAX_CLIENT; conn_idx++)
         {
-            if (fd_client[i] < 0)
+            // 跳过空闲槽位
+            if (connection_table[conn_idx] < 0)
                 continue;
-            client_sock = fd_client[i];
-            if (FD_ISSET(client_sock, &ready_fd))
+                
+            client_fd = connection_table[conn_idx];
+            
+            // 检查该连接是否有数据可读
+            if (FD_ISSET(client_fd, &read_set_tmp))
             {
-                readret = 0;
-                int sizep = 0;
-                int increase = 0;
-                readret = recv(client_sock, buf, sizeof(buf), 0);
-                if (readret <= 0)
+                bytes_read = 0;
+                int header_len = 0;      // HTTP头部长度
+                int buffer_pos = 0;      // 缓冲区处理位置
+                
+                // 接收客户端数据
+                bytes_read = recv(client_fd, input_buffer, sizeof(input_buffer), 0);
+                
+                /* 处理连接关闭或错误 */
+                if (bytes_read <= 0)
                 {
-                    close_socket(client_sock);
-                    FD_CLR(client_sock, &ready_fd);
-                    fd_client[i] = -1;
+                    // 关闭连接并从监听集合中移除
+                    close_socket(client_fd);
+                    FD_CLR(client_fd, &read_set_master);
+                    connection_table[conn_idx] = -1;
                 }
-                else
+                else  // 收到有效数据
                 {
-                    while (increase < readret)
+                    /* 解析和处理HTTP请求 */
+                    while (buffer_pos < bytes_read)
                     {
-                        char *tmp = strstr(buf + increase, separate);
-                        if (tmp != NULL)
+                        // 查找HTTP请求结束标记 "\r\n\r\n"
+                        char *delim_pos = strstr(input_buffer + buffer_pos, separate);
+                        if (delim_pos != NULL)
                         {
-                            tmp += 3;
-                            sizep = tmp - (buf + increase) + 1;
+                            delim_pos += 3;  // 移动到结束标记末尾
+                            header_len = delim_pos - (input_buffer + buffer_pos) + 1;
 
-                            memset(buf2, 0, sizeof(buf2));
-                            memcpy(buf2, buf + increase, sizep);
-                            buf2[sizep] = '\0';
-                            Request *request = parse(buf2, sizep, client_sock);
-                            increase += sizep;
-                            if (request == NULL)
+                            // 复制HTTP请求到解析缓冲区
+                            memset(req_buffer, 0, sizeof(req_buffer));
+                            memcpy(req_buffer, input_buffer + buffer_pos, header_len);
+                            req_buffer[header_len] = '\0';  // 添加字符串结束符
+                            
+                            // 解析HTTP请求
+                            Request *http_request = parse(req_buffer, header_len, client_fd);
+                            buffer_pos += header_len;  // 更新缓冲区位置
+                            
+                            /* 处理不同的HTTP请求情况 */
+                            if (http_request == NULL)  // 请求格式错误
                             {
-                                memset(buf1, 0, BUF_SIZE);
-                                memcpy(buf1, RESPONSE_400, sizeof(RESPONSE_400));
-                                send(client_sock, buf1, sizeof(buf1), 0);
+                                memset(resp_buffer, 0, BUF_SIZE);
+                                memcpy(resp_buffer, RESPONSE_400, sizeof(RESPONSE_400));
+                                send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
                             }
-                            else if (strcmp(request->http_version, http_version_now) != 0)
+                            else if (strcmp(http_request->http_version, http_version_now) != 0)  // HTTP版本不支持
                             {
-                                memset(buf1, 0, BUF_SIZE);
-                                memcpy(buf1, RESPONSE_505, sizeof(RESPONSE_505));
-                                send(client_sock, buf1, sizeof(buf1), 0);
-                                free(request->headers);
-                                free(request);
+                                memset(resp_buffer, 0, BUF_SIZE);
+                                memcpy(resp_buffer, RESPONSE_505, sizeof(RESPONSE_505));
+                                send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
+                                free(http_request->headers);
+                                free(http_request);
                             }
-                            else if (!strcmp(request->http_method, c_post))
+                            else if (!strcmp(http_request->http_method, c_post))  // POST请求
                             {
-                                send(client_sock, buf, readret, 0);
-                                free(request->headers);
-                                free(request);
+                                send(client_fd, input_buffer, bytes_read, 0);
+                                free(http_request->headers);
+                                free(http_request);
                             }
-                            else if (!strcmp(request->http_method, c_get))
+                            else if (!strcmp(http_request->http_method, c_get))   // GET请求
                             {
-                                char get_URL[BUF_SIZE];
-                                memset(get_URL, 0, sizeof(get_URL));
-                                strcat(get_URL, root_path);
-                                int get_flag = GET_SUCCESS;
-                                if (strcmp(request->http_uri, "/") == 0)
-                                    strcat(get_URL, file_path);
-                                else if (sizeof(request->http_uri) + sizeof(root_path) < URL_MAX_SIZE)
-                                    strcat(get_URL, request->http_uri);
-                                else
+                                char resource_path[BUF_SIZE];
+                                memset(resource_path, 0, sizeof(resource_path));
+                                strcat(resource_path, root_path);
+                                int status = GET_SUCCESS;
+                                
+                                // 处理URI路径
+                                if (strcmp(http_request->http_uri, "/") == 0)  // 根路径
+                                    strcat(resource_path, file_path);
+                                else if (sizeof(http_request->http_uri) + sizeof(root_path) < URL_MAX_SIZE)
+                                    strcat(resource_path, http_request->http_uri);
+                                else  // URI路径过长
                                 {
-                                    get_flag = GET_FAILURE;
-                                    memset(buf1, 0, sizeof(buf1));
-                                    memcpy(buf1, RESPONSE_404, sizeof(RESPONSE_404));
-                                    send(client_sock, buf1, sizeof(buf1), 0);
+                                    status = GET_FAILURE;
+                                    memset(resp_buffer, 0, sizeof(resp_buffer));
+                                    memcpy(resp_buffer, RESPONSE_404, sizeof(RESPONSE_404));
+                                    send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
                                 }
-                                if (get_flag == GET_SUCCESS)
+                                
+                                // 处理GET请求
+                                if (status == GET_SUCCESS)
                                 {
-                                    int get_state = http_get(request, get_URL, client_sock, readret, sock);
-                                    if (get_state == GET_FAILURE)
+                                    int result = http_get(http_request, resource_path, client_fd, bytes_read, server_fd);
+                                    if (result == GET_FAILURE)  // 文件不存在或无法访问
                                     {
-                                        memset(buf1, 0, sizeof(buf1));
-                                        memcpy(buf1, RESPONSE_404, sizeof(RESPONSE_404));
-                                        send(client_sock, buf1, sizeof(buf1), 0);
+                                        memset(resp_buffer, 0, sizeof(resp_buffer));
+                                        memcpy(resp_buffer, RESPONSE_404, sizeof(RESPONSE_404));
+                                        send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
                                     }
                                 }
-                                free(request->headers);
-                                free(request);
+                                free(http_request->headers);
+                                free(http_request);
                             }
-                            else if (!strcmp(request->http_method, c_head))
+                            else if (!strcmp(http_request->http_method, c_head))  // HEAD请求
                             {
-                                char head_URL[BUF_SIZE];
-                                memset(head_URL, 0, sizeof(head_URL));
-                                strcat(head_URL, root_path);
-                                int head_flag = GET_SUCCESS;
-                                if (strcmp(request->http_uri, "/") == 0)
-                                    strcat(head_URL, file_path);
-                                else if (sizeof(request->http_uri) + sizeof(root_path) < URL_MAX_SIZE)
-                                    strcat(head_URL, request->http_uri);
-                                else
+                                char resource_path[BUF_SIZE];
+                                memset(resource_path, 0, sizeof(resource_path));
+                                strcat(resource_path, root_path);
+                                int status = GET_SUCCESS;
+                                
+                                // 处理URI路径
+                                if (strcmp(http_request->http_uri, "/") == 0)  // 根路径
+                                    strcat(resource_path, file_path);
+                                else if (sizeof(http_request->http_uri) + sizeof(root_path) < URL_MAX_SIZE)
+                                    strcat(resource_path, http_request->http_uri);
+                                else  // URI路径过长
                                 {
-                                    head_flag = GET_FAILURE;
-                                    memset(buf1, 0, sizeof(buf1));
-                                    memcpy(buf1, RESPONSE_404, sizeof(RESPONSE_404));
-                                    send(client_sock, buf1, sizeof(buf1), 0);
+                                    status = GET_FAILURE;
+                                    memset(resp_buffer, 0, sizeof(resp_buffer));
+                                    memcpy(resp_buffer, RESPONSE_404, sizeof(RESPONSE_404));
+                                    send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
                                 }
-                                if (head_flag == GET_SUCCESS)
+                                
+                                // 处理HEAD请求
+                                if (status == GET_SUCCESS)
                                 {
-                                    int head_state = http_head(request, head_URL, client_sock, readret, sock);
-                                    if (head_state == GET_FAILURE)
+                                    int result = http_head(http_request, resource_path, client_fd, bytes_read, server_fd);
+                                    if (result == GET_FAILURE)  // 文件不存在或无法访问
                                     {
-                                        memset(buf1, 0, sizeof(buf1));
-                                        memcpy(buf1, RESPONSE_404, sizeof(RESPONSE_404));
-                                        send(client_sock, buf1, sizeof(buf1), 0);
+                                        memset(resp_buffer, 0, sizeof(resp_buffer));
+                                        memcpy(resp_buffer, RESPONSE_404, sizeof(RESPONSE_404));
+                                        send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
                                     }
                                 }
-                                free(request->headers);
-                                free(request);
+                                free(http_request->headers);
+                                free(http_request);
                             }
-                            else
+                            else  // 不支持的HTTP方法
                             {
-                                memset(buf1, 0, sizeof(buf1));
-                                memcpy(buf1, RESPONSE_501, sizeof(RESPONSE_501));
-                                send(client_sock, buf1, sizeof(buf1), 0);
-                                free(request->headers);
-                                free(request);
+                                memset(resp_buffer, 0, sizeof(resp_buffer));
+                                memcpy(resp_buffer, RESPONSE_501, sizeof(RESPONSE_501));
+                                send(client_fd, resp_buffer, sizeof(resp_buffer), 0);
+                                free(http_request->headers);
+                                free(http_request);
                             }
                         }
-                        else
+                        else  // 没找到HTTP请求结束标记
                         {
-                            break;
-                        }
+                break;
+            }
                     }
                 }
-                FD_CLR(client_sock, &ready_fd);
-                fd_client[i] = -1;
-                close_socket(client_sock);
+                
+                /* 请求处理完成，关闭连接 */
+                FD_CLR(client_fd, &read_set_master);
+                connection_table[conn_idx] = -1;
+                close_socket(client_fd);
             }
         }
     }
 
-    close_socket(sock);
+    /* 关闭服务器套接字 */
+    close_socket(server_fd);
     return EXIT_SUCCESS;
 }
